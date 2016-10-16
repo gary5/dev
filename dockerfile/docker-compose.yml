@@ -1,0 +1,30 @@
+version: '2'
+
+services:
+  base:
+    build:
+      context: ./base
+      args:
+        MIRROR: "${MIRROR}"
+    image: garywu/base
+  develop:
+    build:
+      context: ./develop
+      args:
+        USER: "${USER}"
+    depends_on:
+      - base
+    image: garywu/develop
+  node:
+    build:
+      context: ./node
+    depends_on:
+      - develop
+    image: garywu/node
+  ubuntu-desktop:
+    build:
+      context: ./ubuntu-desktop
+      args:
+        MIRROR: "${MIRROR}"
+        USER: "${USER}"
+    image: garywu/ubuntu-desktop

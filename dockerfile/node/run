@@ -1,0 +1,8 @@
+HOSTDIR="/home/${USER}/run"
+
+docker run -it --rm \
+  --name node \
+  -w "/home/${USER}" \
+  -v "${HOSTDIR}/dev/${USER}:/home/${USER}" \
+  garywu/node \
+  /bin/bash -c "echo 'nvm use v6.6.0' > /tmp/init && /bin/bash"

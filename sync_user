@@ -1,0 +1,17 @@
+DEV_HOME=$(pwd)
+
+mkdir -p ${USER} user
+
+docker run -it --rm \
+  -w /home/${USER} \
+  -v "${DEV_HOME}/${USER}:/tmp/user" \
+  -v "/dev/sdb:/dev/sdb" \
+  garywu/node \
+  /bin/bash -c "mkdir -p /tmp/user && rsync -au ~/ /tmp/user"
+
+docker run -it --rm \
+  -w /home/user \
+  -v "${DEV_HOME}/user:/tmp/user" \
+  -v "/dev/sdb:/dev/sdb" \
+  garywu/eclipse-node \
+  /bin/bash -c "mkdir -p /tmp/user && rsync -au ~/ /tmp/user"

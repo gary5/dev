@@ -1,0 +1,15 @@
+version: '2'
+
+services:
+  base:
+    build:
+      context: ./base
+      args:
+        MIRROR: "${MIRROR}"
+    image: garywu/eclipse-base
+  node:
+    build:
+      context: ./node
+    depends_on:
+      - base
+    image: garywu/eclipse-node

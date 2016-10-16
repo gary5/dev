@@ -1,0 +1,1 @@
+for x in $(docker images | grep "eclipse-che\/workspace" | sed -r "s/(\S+)\s+(\S+).+/\1:\2/g"); do docker rmi $x; done
