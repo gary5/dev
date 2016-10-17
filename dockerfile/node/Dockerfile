@@ -1,5 +1,10 @@
 FROM garywu/develop
 
+USER root
+# for phantomjs
+RUN apt-get -y install libfontconfig
+
+USER ${USER}
 # install nvm
 ENV NVM_DIR ${HOME}/.nvm
 RUN curl -o- https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash && \
