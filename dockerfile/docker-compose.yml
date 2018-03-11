@@ -7,24 +7,12 @@ services:
       args:
         MIRROR: "${MIRROR}"
     image: garywu/base
-  develop:
+  ubuntu-desktop-develop:
     build:
-      context: ./develop
-      args:
-        USER: "${USER}"
-    depends_on:
-      - base
-    image: garywu/develop
-  node:
-    build:
-      context: ./node
-    depends_on:
-      - develop
-    image: garywu/node
-  ubuntu-desktop:
-    build:
-      context: ./ubuntu-desktop
+      context: ./ubuntu-desktop-develop
       args:
         MIRROR: "${MIRROR}"
         USER: "${USER}"
-    image: garywu/ubuntu-desktop
+    depends_on:
+      - base
+    image: garywu/ubuntu-desktop-develop

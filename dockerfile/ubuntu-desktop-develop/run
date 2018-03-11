@@ -1,0 +1,25 @@
+echo "
+
+# install node
+nvm install v9.4.0
+
+# set terminal alias
+alias roxterm='roxterm -c Default -d \${HOME}'
+
+" > /tmp/docker_init_script
+chmod +x /tmp/docker_init_script
+
+docker run --name ubuntu-desktop-develop --rm \
+  -p 5901:5901 \
+  -v /tmp/docker_init_script:/tmp/init \
+  garywu/ubuntu-desktop-develop &
+
+echo "STARTING......"
+sleep 1
+
+echo "VIEWING......"
+running_dir=$(dirname "$0")
+/Applications/VNC\ Viewer.app/Contents/MacOS/vncviewer localhost:5901 -passwd "${running_dir}/passwd"
+
+echo "STOPING......"
+docker stop ubuntu-desktop-develop

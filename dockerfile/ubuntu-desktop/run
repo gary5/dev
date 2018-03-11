@@ -1,1 +1,0 @@
-docker run --name ubuntu-desktop --rm -it -p 5901:5901 garywu/ubuntu-desktop
