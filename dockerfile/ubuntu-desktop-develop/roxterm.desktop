@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=ROXTerm
+GenericName=Terminal
+Comment=Use the command line
+Keywords=shell;prompt;command;commandline;
+TryExec=roxterm
+Exec=roxterm -c Default
+Icon=roxterm
+Type=Application
+Categories=GTK;Utility;TerminalEmulator;System;

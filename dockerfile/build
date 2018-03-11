@@ -1,0 +1,12 @@
+running_dir=$(dirname "$0")
+
+source "${running_dir}/.env"
+docker-compose -f "${running_dir}/docker-compose.yml" build
+
+rm -fr "${HOME}/develop_home"
+mkdir -p "${HOME}/develop_home"
+docker run -it --rm \
+  -w "/home/${USER}" \
+  -v "${HOME}/develop_home:/tmp/user" \
+  garywu/ubuntu-desktop-develop \
+  /bin/bash -c "mkdir -p /tmp/user && rsync -au ~/ /tmp/user"

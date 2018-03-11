@@ -1,0 +1,37 @@
+running_dir=$(dirname "$0")
+node_version="$1"
+[ -z "${node_version}" ] && node_version="9.4.0"
+
+echo "
+
+# install node
+nvm use v${node_version} || nvm install v${node_version}
+
+# set terminal alias
+alias roxterm='roxterm -c Default -d \${HOME}'
+
+" > /tmp/docker_init_script
+chmod +x /tmp/docker_init_script
+
+
+
+docker run --name ubuntu-desktop-develop --rm \
+  -p 5901:5901 \
+  -w "/home/${USER}" \
+  -v "/tmp/docker_init_script:/tmp/init" \
+  -v "${HOME}/develop_home:/home/${USER}" \
+  -v "${HOME}:/home/${USER}/host_home" \
+  garywu/ubuntu-desktop-develop &
+
+echo "STARTING......"
+sleep 1
+
+
+
+echo "VIEWING......"
+/Applications/VNC\ Viewer.app/Contents/MacOS/vncviewer localhost:5901 -passwd "${running_dir}/ubuntu-desktop-develop/passwd"
+
+
+
+echo "STOPING......"
+docker stop ubuntu-desktop-develop
