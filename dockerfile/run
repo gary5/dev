@@ -1,3 +1,5 @@
+#!/bin/bash
+
 running_dir=$(dirname "$0")
 node_version="$1"
 [ -z "${node_version}" ] && node_version="9.4.0"
@@ -16,20 +18,24 @@ chmod +x /tmp/docker_init_script
 
 
 docker run --name ubuntu-desktop-develop --rm \
+  -p 22:22 \
   -p 5901:5901 \
+  -p 5000:5000/tcp \
   -w "/home/${USER}" \
   -v "/tmp/docker_init_script:/tmp/init" \
   -v "${HOME}/develop_home:/home/${USER}" \
   -v "${HOME}:/home/${USER}/host_home" \
+  -v ${HOME}/.ssh:/home/${USER}/.ssh \
+  -v ${HOME}/.gitconfig:/home/${USER}/.gitconfig \
   garywu/ubuntu-desktop-develop &
 
 echo "STARTING......"
-sleep 1
+sleep 3
 
 
 
 echo "VIEWING......"
-/Applications/VNC\ Viewer.app/Contents/MacOS/vncviewer localhost:5901 -passwd "${running_dir}/ubuntu-desktop-develop/passwd"
+/Applications/VNC\ Viewer.app/Contents/MacOS/vncviewer localhost:1 -passwd "${running_dir}/ubuntu-desktop-develop/passwd"
 
 
 

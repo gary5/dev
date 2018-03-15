@@ -11,7 +11,6 @@ services:
     build:
       context: ./ubuntu-desktop-develop
       args:
-        MIRROR: "${MIRROR}"
         USER: "${USER}"
     depends_on:
       - base
