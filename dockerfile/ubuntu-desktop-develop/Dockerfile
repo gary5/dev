@@ -9,28 +9,42 @@ RUN \
   curl vim unzip bzip2 \
   git
 
-# for xwindow
-RUN apt-get clean && apt-get update && \
+# install ssh
+RUN \
+    apt-get clean && apt-get update && \
+    apt-get install -y openssh-server net-tools
+RUN mkdir -p /var/run/sshd
+
+# install xwindow
+RUN \
+    apt-get clean && apt-get update && \
     export DEBIAN_FRONTEND=noninteractive && \
     apt-get install -y --no-install-recommends ubuntu-desktop && \
-    apt-get install -y gnome-panel gnome-settings-daemon metacity nautilus
+    apt-get install -y gnome-panel gnome-settings-daemon metacity nautilus gnome-terminal fonts-noto
 RUN apt-get install -y roxterm
-RUN apt-get install -y tightvncserver autocutsel
 RUN apt-get install -y locales && locale-gen en_US.UTF-8 && locale-gen zh_TW.UTF-8
 ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8'
 
-# for service management
-RUN apt-get install -y supervisor
-RUN mkdir -p /var/log/supervisor
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-# for ssh
-RUN apt-get install -y openssh-server net-tools
-RUN mkdir -p /var/run/sshd
+# install chrome
+RUN \
+  wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - && \
+  echo "deb http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google.list && \
+  apt-get update && \
+  apt-get install -y google-chrome-stable && \
+  rm -rf /var/lib/apt/lists/*
+
+# install vncserver
+RUN apt-get install -y tightvncserver autocutsel
 
 # compilers
 RUN apt-get -y install build-essential
-# opencv
-RUN apt-get -y install cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev
+# opencv: required
+RUN \
+  apt-get clean && apt-get update && \
+  apt-get -y install cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev \
+  ocl-icd-libopencl1 opencl-headers libv4l-dev libopencv-dev
+# python for opencv
+RUN apt-get -y install python-pip && pip install --upgrade pip
 
 
 ARG USER
@@ -38,23 +52,39 @@ ARG USER
 RUN useradd -ms /bin/bash ${USER} && \
   echo "${USER}:${USER}" | chpasswd && adduser ${USER} sudo
 
-
+# opencv: env setup
+RUN pip install virtualenv virtualenvwrapper
+RUN rm -rf ~/.cache/pip
 # for roxterm
 COPY roxterm.desktop /home/${USER}/Desktop/roxterm.desktop
+
 # for vncserver
 RUN mkdir /home/${USER}/.vnc
 COPY xstartup /home/${USER}/.vnc/xstartup
 COPY passwd /home/${USER}/.vnc/passwd
 RUN chown -R ${USER}:${USER} /home/${USER} && \
+  chmod 755 /home/${USER}/.vnc/xstartup && \
   chmod 600 /home/${USER}/.vnc/passwd
 
+
+# install service management
+RUN \
+    apt-get clean && apt-get update && \
+    apt-get install -y supervisor
+RUN mkdir -p /var/log/supervisor
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 USER ${USER}
 ENV USER=${USER}
 
+# opencv: virtualenv and virtualenvwrapper
+RUN echo "export WORKON_HOME=\$HOME/.virtualenvs\n\
+source /usr/local/bin/virtualenvwrapper.sh" >> ~/.bashrc
+
+
 # install nvm
 RUN curl -s -o- https://raw.githubusercontent.com/creationix/nvm/master/install.sh | /bin/bash
-RUN echo "[ -f "/tmp/init" ] && source /tmp/init" >> ~/.bashrc
+RUN echo "[ -f "/tmp/docker_init_script" ] && source /tmp/docker_init_script" >> ~/.bashrc
 
 USER root
 ENV USER=root
