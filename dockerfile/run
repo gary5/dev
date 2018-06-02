@@ -2,7 +2,7 @@
 
 running_dir=$(cd $(dirname "$0") && pwd)
 node_version="$1"
-[ -z "${node_version}" ] && node_version="9.4.0"
+[ -z "${node_version}" ] && node_version="10.3.0"
 
 echo "
 

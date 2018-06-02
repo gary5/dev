@@ -6,8 +6,7 @@ RUN \
   apt-get clean && apt-get update && \
   apt-get -y install sudo \
   make g++ python \
-  curl vim unzip bzip2 \
-  git
+  curl vim unzip bzip2
 
 # install ssh
 RUN \
@@ -30,11 +29,12 @@ RUN \
   wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - && \
   echo "deb http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google.list && \
   apt-get update && \
-  apt-get install -y google-chrome-stable && \
-  rm -rf /var/lib/apt/lists/*
+  apt-get install -y google-chrome-stable
 
 # install vncserver
-RUN apt-get install -y tightvncserver autocutsel
+RUN \
+    apt-get clean && apt-get update && \
+    apt-get install -y tightvncserver autocutsel
 
 # compilers
 RUN apt-get -y install build-essential
@@ -74,6 +74,14 @@ RUN \
 RUN mkdir -p /var/log/supervisor
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
+# intall git
+RUN \
+    apt-get clean && apt-get update && \
+    apt-get install -y git
+
+# clear cache
+RUN rm -rf /var/lib/apt/lists/*
+
 USER ${USER}
 ENV USER=${USER}
 
@@ -81,10 +89,12 @@ ENV USER=${USER}
 RUN echo "export WORKON_HOME=\$HOME/.virtualenvs\n\
 source /usr/local/bin/virtualenvwrapper.sh" >> ~/.bashrc
 
-
 # install nvm
-RUN curl -s -o- https://raw.githubusercontent.com/creationix/nvm/master/install.sh | /bin/bash
+RUN curl -s -o- https://raw.githubusercontent.com/creationix/nvm/master/install.sh | /bin/bash; /bin/bash -i -c 'nvm install v10.3.0'
 RUN echo "[ -f "/tmp/docker_init_script" ] && source /tmp/docker_init_script" >> ~/.bashrc
+
+# install yarn
+RUN curl -o- -L https://yarnpkg.com/install.sh | /bin/bash -i
 
 USER root
 ENV USER=root

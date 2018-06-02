@@ -3,13 +3,13 @@
 running_dir=$(cd $(dirname "$0") && pwd)
 
 source "${running_dir}/.env"
-docker-compose -f "${running_dir}/docker-compose.yml" build
+docker-compose -f "${running_dir}/docker-compose.yml" build || exit 1
 
 mkdir -p "${HOME}/develop_home"
 docker run -it --rm \
   -w "/home/${USER}" \
   -v "${HOME}/develop_home:/tmp/user" \
   garywu/ubuntu-desktop-develop \
-  /bin/bash -c "mkdir -p /tmp/user && rsync -aupr ./ /tmp/user && exit"
+  /bin/bash -c "mkdir -p /tmp/user && rsync -aupr ./ /tmp/user && exit" || exit 1
 
 ${running_dir}/rmis
