@@ -34,7 +34,7 @@ RUN \
 # install vncserver
 RUN \
     apt-get clean && apt-get update && \
-    apt-get install -y tightvncserver autocutsel
+    apt-get install -y vnc4server autocutsel
 
 # compilers
 RUN apt-get -y install build-essential
@@ -79,8 +79,20 @@ RUN \
     apt-get clean && apt-get update && \
     apt-get install -y git
 
+# install atom
+RUN apt-get install apt-transport-https
+RUN curl -sL https://packagecloud.io/AtomEditor/atom/gpgkey | sudo apt-key add -
+RUN echo "deb [arch=amd64] https://packagecloud.io/AtomEditor/atom/any/ any main" > /etc/apt/sources.list.d/atom.list
+RUN \
+    apt-get clean && apt-get update && \
+    apt-get install -y atom
+
 # clear cache
 RUN rm -rf /var/lib/apt/lists/*
+
+# Fix GUI app issue
+RUN cp /usr/lib/x86_64-linux-gnu/libxcb.so.1 /usr/lib/x86_64-linux-gnu/libxcb.so.1.bak
+RUN sed -i 's/BIG-REQUESTS/_IG-REQUESTS/' /usr/lib/x86_64-linux-gnu/libxcb.so.1
 
 USER ${USER}
 ENV USER=${USER}
@@ -95,6 +107,14 @@ RUN echo "[ -f "/tmp/docker_init_script" ] && source /tmp/docker_init_script" >>
 
 # install yarn
 RUN curl -o- -L https://yarnpkg.com/install.sh | /bin/bash -i
+
+# install atom packages
+RUN apm install language-babel
+RUN apm install atom-ternjs
+RUN apm install linter linter-ui-default intentions busy-signal linter-eslint
+RUN apm install file-icons
+RUN apm install pretty-json
+RUN apm install termination
 
 USER root
 ENV USER=root
