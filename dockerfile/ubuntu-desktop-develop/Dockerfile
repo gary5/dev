@@ -3,58 +3,68 @@ FROM garywu/base
 
 # for development
 RUN \
-  apt-get clean && apt-get update && \
-  apt-get -y install sudo \
+  apt-get clean && apt-get update \
+  && apt-get -y install sudo \
   make g++ python \
-  curl vim unzip bzip2
+  curl vim unzip bzip2 \
+  && rm -rf /var/lib/apt/lists/*
 
 # install ssh
 RUN \
-    apt-get clean && apt-get update && \
-    apt-get install -y openssh-server net-tools
+    apt-get clean && apt-get update \
+    && apt-get install -y openssh-server net-tools \
+    && rm -rf /var/lib/apt/lists/*
 RUN mkdir -p /var/run/sshd
 
 # install xwindow
 RUN \
-    apt-get clean && apt-get update && \
-    export DEBIAN_FRONTEND=noninteractive && \
-    apt-get install -y --no-install-recommends ubuntu-desktop && \
-    apt-get install -y gnome-panel gnome-settings-daemon metacity nautilus gnome-terminal fonts-noto
-RUN apt-get install -y roxterm
-RUN apt-get install -y locales && locale-gen en_US.UTF-8 && locale-gen zh_TW.UTF-8
+    apt-get clean && apt-get update \
+    && export DEBIAN_FRONTEND=noninteractive \
+    && apt-get install -y --no-install-recommends ubuntu-desktop \
+    && apt-get install -y gnome-panel gnome-settings-daemon metacity nautilus gnome-terminal fonts-noto \
+    roxterm \
+    locales && locale-gen en_US.UTF-8 && locale-gen zh_TW.UTF-8 \
+    && rm -rf /var/lib/apt/lists/*
 ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8'
 
 # install chrome
 RUN \
-  wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - && \
-  echo "deb http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google.list && \
-  apt-get update && \
-  apt-get install -y google-chrome-stable
+  wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
+  && echo "deb http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google.list \
+  && apt-get clean && apt-get update \
+  && apt-get install -y google-chrome-stable \
+  && rm -rf /var/lib/apt/lists/*
 
 # install vncserver
 RUN \
-    apt-get clean && apt-get update && \
-    apt-get install -y vnc4server autocutsel
+    apt-get clean && apt-get update \
+    && apt-get install -y vnc4server autocutsel \
+    && rm -rf /var/lib/apt/lists/*
 
 # compilers
-RUN apt-get -y install build-essential
-# opencv: required
 RUN \
-  apt-get clean && apt-get update && \
-  apt-get -y install cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev \
-  ocl-icd-libopencl1 opencl-headers libv4l-dev libopencv-dev
-# python for opencv
-RUN apt-get -y install python-pip && pip install --upgrade pip
+    apt-get clean && apt-get update \
+    && apt-get -y install build-essential \
+    && rm -rf /var/lib/apt/lists/*
+# opencv: required, python for opencv
+RUN \
+  apt-get clean && apt-get update \
+  && apt-get -y install cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev \
+  ocl-icd-libopencl1 opencl-headers libv4l-dev libopencv-dev \
+  python-pip \
+  && pip install --upgrade pip \
+  && rm -rf ~/.cache/pip \
+  && rm -rf /var/lib/apt/lists/*
 
 
 ARG USER
 # add user
-RUN useradd -ms /bin/bash ${USER} && \
-  echo "${USER}:${USER}" | chpasswd && adduser ${USER} sudo
+RUN useradd -ms /bin/bash ${USER} \
+  && echo "${USER}:${USER}" | chpasswd && adduser ${USER} sudo
 
 # opencv: env setup
-RUN pip install virtualenv virtualenvwrapper
-RUN rm -rf ~/.cache/pip
+RUN pip install virtualenv virtualenvwrapper \
+    && rm -rf ~/.cache/pip
 # for roxterm
 COPY roxterm.desktop /home/${USER}/Desktop/roxterm.desktop
 
@@ -62,33 +72,34 @@ COPY roxterm.desktop /home/${USER}/Desktop/roxterm.desktop
 RUN mkdir /home/${USER}/.vnc
 COPY xstartup /home/${USER}/.vnc/xstartup
 COPY passwd /home/${USER}/.vnc/passwd
-RUN chown -R ${USER}:${USER} /home/${USER} && \
-  chmod 755 /home/${USER}/.vnc/xstartup && \
-  chmod 600 /home/${USER}/.vnc/passwd
+RUN chown -R ${USER}:${USER} /home/${USER} \
+  && chmod 755 /home/${USER}/.vnc/xstartup \
+  && chmod 600 /home/${USER}/.vnc/passwd
 
 
 # install service management
 RUN \
-    apt-get clean && apt-get update && \
-    apt-get install -y supervisor
+    apt-get clean && apt-get update \
+    && apt-get install -y supervisor \
+    && rm -rf /var/lib/apt/lists/*
 RUN mkdir -p /var/log/supervisor
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # intall git
 RUN \
-    apt-get clean && apt-get update && \
-    apt-get install -y git
+    apt-get clean && apt-get update \
+    && apt-get install -y git \
+    && rm -rf /var/lib/apt/lists/*
 
 # install atom
-RUN apt-get install apt-transport-https
-RUN curl -sL https://packagecloud.io/AtomEditor/atom/gpgkey | sudo apt-key add -
-RUN echo "deb [arch=amd64] https://packagecloud.io/AtomEditor/atom/any/ any main" > /etc/apt/sources.list.d/atom.list
 RUN \
-    apt-get clean && apt-get update && \
-    apt-get install -y atom
-
-# clear cache
-RUN rm -rf /var/lib/apt/lists/*
+    apt-get clean && apt-get update \
+    && apt-get install apt-transport-https \
+    && curl -sL https://packagecloud.io/AtomEditor/atom/gpgkey | sudo apt-key add - \
+    && echo "deb [arch=amd64] https://packagecloud.io/AtomEditor/atom/any/ any main" > /etc/apt/sources.list.d/atom.list \
+    && apt-get clean && apt-get update \
+    && apt-get install -y atom \
+    && rm -rf /var/lib/apt/lists/*
 
 # Fix GUI app issue
 RUN cp /usr/lib/x86_64-linux-gnu/libxcb.so.1 /usr/lib/x86_64-linux-gnu/libxcb.so.1.bak

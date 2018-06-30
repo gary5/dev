@@ -15,20 +15,7 @@ alias roxterm='roxterm -c Default -d \${HOME}'
 " > /tmp/docker_init_script
 chmod +x /tmp/docker_init_script
 
-
-
-docker run --name ubuntu-desktop-develop --rm \
-  -p 1022:22 \
-  -p 5901:5901 \
-  -p 5000:5000/tcp \
-  -w "/home/${USER}" \
-  -v "/tmp/docker_init_script:/tmp/docker_init_script" \
-  -v "${HOME}/develop_home:/home/${USER}:rw,cached" \
-  -v "${HOME}:/home/${USER}/host_home:rw,cached" \
-  -v ${HOME}/.ssh:/home/${USER}/.ssh \
-  -v ${HOME}/.gitconfig:/home/${USER}/.gitconfig \
-  --privileged \
-  garywu/ubuntu-desktop-develop &
+docker-compose up -d ubuntu-desktop-develop
 
 echo "STARTING......"
 sleep 3
@@ -36,9 +23,9 @@ sleep 3
 
 
 echo "VIEWING......"
-/Applications/VNC\ Viewer.app/Contents/MacOS/vncviewer localhost:1 -passwd "${running_dir}/ubuntu-desktop-develop/passwd"
+/Applications/VNC\ Viewer.app/Contents/MacOS/vncviewer localhost:15901 -passwd "${running_dir}/ubuntu-desktop-develop/passwd"
 
 
 
 echo "STOPING......"
-docker stop ubuntu-desktop-develop
+docker-compose down

@@ -15,3 +15,28 @@ services:
     depends_on:
       - base
     image: garywu/ubuntu-desktop-develop
+    container_name: ubuntu-desktop-develop
+    working_dir: /home/${USER}
+    networks:
+      - local
+    ports:
+      - "10022:22"
+      - "15901:5901"
+      - "15000:5000"
+    env_file:
+      .env
+    volumes:
+      # - develop-home-sync:/home/${USER}:nocopy
+      - ${HOME}/develop_home:/home/${USER}:rw,cached
+      - ${HOME}:/home/${USER}/host_home:rw,cached
+      - /tmp/docker_init_script:/tmp/docker_init_script:cached
+      - ${HOME}/.ssh:/home/${USER}/.ssh:rw,cached
+      - ${HOME}/.gitconfig:/home/${USER}/.gitconfig:rw,cached
+    privileged: true
+    stdin_open: true
+networks:
+  local:
+# that the important thing
+# volumes:
+#   develop-home-sync:
+#     external: true
